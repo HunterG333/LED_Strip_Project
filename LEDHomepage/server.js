@@ -1,10 +1,11 @@
 const http = require("http");
 const fs = require('fs').promises;
-const host = 'localhost';
-const port = 3000;
+const { exec } = require('child_process');
+
+const host = '192.168.4.46';
+const port = 8000;
 
 let indexFile;
-let scriptFile;
 
 const requestListener = function (req, res) {
   if (req.method === 'POST' && req.url === '/command') {
@@ -17,12 +18,21 @@ const requestListener = function (req, res) {
       try {
         const parsedData = JSON.parse(data);
         console.log('Received command:', parsedData.command);
-        // Here you can execute the command, for example:
-        // executeCommand(parsedData.command);
         
-        // Send response back to the client
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'Command received successfully' }));
+        // Execute the command received from the client
+        exec(parsedData.command, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`Error executing command: ${error}`);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Internal server error' }));
+            return;
+          }
+          console.log('Command output:', stdout);
+          
+          // Send response back to the client
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ message: 'Command executed successfully' }));
+        });
       } catch (error) {
         console.error('Error parsing JSON:', error);
         res.writeHead(400, { 'Content-Type': 'application/json' });
