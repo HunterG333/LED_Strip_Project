@@ -7,13 +7,23 @@ import time
 # Initialize serial
 ser = serial.Serial('COM5', 1200)
 
-#need a minimum time because i think the serial is getting overloaded. this way it wont break for now until it is optimized
 # Define the minimum time interval between command executions (in seconds)
 MIN_COMMAND_INTERVAL = 1  # Adjust this value as needed
 
 last_command_time = 0
 
 class CommandHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        # Handle GET requests
+        if self.path == '/':
+            # Redirect users to the index page of LEDHomepage
+            self.send_response(301)  # 301 Moved Permanently
+            self.send_header('Location', '/LEDHomepage/index.html')
+            self.end_headers()
+        else:
+            # Serve files normally for other URLs
+            super().do_GET()
+        
     def do_POST(self):
         global last_command_time
         content_length = int(self.headers['Content-Length'])
