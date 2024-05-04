@@ -1,8 +1,47 @@
 <!DOCTYPE html>
+
 <head>
-    
+
 </head>
+
 <body>
-    <script src="controllerInterface.js"></script>
+    <script>
+
+        function changeColor(color) {
+            sendCommandToServer(hex2rgb(color));
+        }
+
+        //returns a RGB string that is good to send to the python script
+        function hex2rgb(hexInput) {
+
+            hexInput = hexInput.replace("#", "");
+
+            var r = parseInt(hexInput.substring(0, 2), 16)
+            var g = parseInt(hexInput.substring(2, 4), 16)
+            var b = parseInt(hexInput.substring(4, 6), 16);
+
+            return 'RGB,' + r + ',' + g + ',' + b;
+        }
+
+        // In your handler.js file or within a script tag in your HTML
+        function sendCommandToServer(command) {
+            fetch('http://localhost:3000/command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ command: command }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Server response:', data);
+                    // Handle the server's response if needed
+                })
+                .catch(error => {
+                    console.error('Error sending command to server:', error);
+                });
+        }
+
+    </script>
     <input type="color" id="colorPick" name="colorPick" value="#ff0000" oninput="changeColor(this.value)">
 </body>
